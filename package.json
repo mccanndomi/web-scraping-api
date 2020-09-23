@@ -1,0 +1,17 @@
+{
+  "name": "web-scraping",
+  "version": "1.0.0",
+  "description": "web-scraping",
+  "main": "index.js",
+  "dependencies": {
+    "express": "^4.17.1",
+    "nodemon": "^2.0.4",
+    "npm": "^6.14.8"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "start": "nodemon app.js"
+  },
+  "author": "",
+  "license": "ISC"
+}
