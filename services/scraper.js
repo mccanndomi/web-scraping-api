@@ -35,17 +35,91 @@ module.exports = {
       }
     }
 
+    //got through all links and create objects that follow
+    //"all-posts-structure.json" for a single post
+    var mainPostObjects = [];
+    for (i = 0; i < mainPosts.length; i++) {
+      await page.goto(mainPosts[i]);
+
+      const post = await page.evaluate(() => {
+        //build template structure
+        return (postData = {
+          title: document.querySelector("ul font b").innerText,
+          user: document.querySelector("ul div font").innerText.split(" ")[2],
+          date:
+            document.querySelector("ul div font").innerText.split(" ")[4] +
+            " " + //Month eg: September
+            document.querySelector("ul div font").innerText.split(" ")[5] +
+            " " + //Date eg: 23
+            document.querySelector("ul div font").innerText.split(" ")[6], //Year eg: 2020
+          time:
+            document.querySelector("ul div font").innerText.split(" ")[7] +
+            " " +
+            document.querySelector("ul div font").innerText.split(" ")[8],
+          description: document.querySelector("ul table tbody tr td font div")
+            .innerText,
+          numComments:
+            Array.from(
+              document.querySelectorAll("ul font table tbody tr td ul li")
+            ).length -
+              1 ==
+            1
+              ? 0
+              : Array.from(
+                  document.querySelectorAll("ul font table tbody tr td ul li")
+                ).length - 1,
+        });
+      });
+
+      mainPostObjects[i] = post;
+    }
+
     await browser.close();
 
     //return all main post links
-    return mainPosts;
+    return mainPostObjects;
   },
 
   /**
    * Generates a structured peice of data that follows
-   * "data-structure-example.json" for a single post
+   * "all-posts-structure.json" for a single post
    */
   generatePost: async (url) => {
-    console.log(url);
+    //init browser
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+    await page.goto(url);
+
+    const post = await page.evaluate(() => {
+      //build template structure
+      return (postData = {
+        title: document.querySelector("ul font b").innerText,
+        user: document.querySelector("ul div font").innerText.split(" ")[2],
+        date:
+          document.querySelector("ul div font").innerText.split(" ")[4] +
+          " " + //Month eg: September
+          document.querySelector("ul div font").innerText.split(" ")[5] +
+          " " + //Date eg: 23
+          document.querySelector("ul div font").innerText.split(" ")[6], //Year eg: 2020
+        time:
+          document.querySelector("ul div font").innerText.split(" ")[7] +
+          " " +
+          document.querySelector("ul div font").innerText.split(" ")[8],
+        description: document.querySelector("ul table tbody tr td font div")
+          .innerText,
+        numComments:
+          Array.from(
+            document.querySelectorAll("ul font table tbody tr td ul li")
+          ).length -
+            1 ==
+          1
+            ? 0
+            : Array.from(
+                document.querySelectorAll("ul font table tbody tr td ul li")
+              ).length - 1,
+      });
+    });
+
+    return post;
   },
 };
