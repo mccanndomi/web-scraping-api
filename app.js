@@ -4,22 +4,10 @@ const express = require("express");
 
 const app = express();
 
-//Middlewares
-// app.use("/", () => {
-//   console.log("hello");
-// });
-
-//Rotes
+//Routes
 app.get("/posts", async (req, res) => {
   await scraperModule
     .posts()
-    .then((data) => res.send(data))
-    .catch((error) => console.log("Error: " + error));
-});
-
-app.get("/post", async (req, res) => {
-  await scraperModule
-    .generatePost(req.query.messageUrl)
     .then((data) => res.send(data))
     .catch((error) => console.log("Error: " + error));
 });
