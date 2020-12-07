@@ -63,13 +63,14 @@ module.exports = {
         return (postData = {
           id: getIDfromURL(document.baseURI),
           title: document.querySelector("ul font b").innerText,
-          user: document.querySelector("ul div font").innerText.split(" ")[2],
-          date:
-            document.querySelector("ul div font").innerText.split(" ")[4] +
-            " " + //Month eg: September
-            document.querySelector("ul div font").innerText.split(" ")[5] +
-            " " + //Date eg: 23
-            document.querySelector("ul div font").innerText.split(" ")[6], //Year eg: 2020
+          user: getUsername(document.querySelector("ul div font").innerText.split(" ")),
+          date: getDate(document.querySelector("ul div font").innerText.split(" ")),
+            //-------- OLD WAY -------
+            // document.querySelector("ul div font").innerText.split(" ")[4] +
+            // " " + //Month eg: September
+            // document.querySelector("ul div font").innerText.split(" ")[5] +
+            // " " + //Date eg: 23
+            // document.querySelector("ul div font").innerText.split(" ")[6], //Year eg: 2020
           time:
             document.querySelector("ul div font").innerText.split(" ")[7] +
             " " +
@@ -92,13 +93,60 @@ module.exports = {
             .map((entry) => getIDfromURL(entry.firstChild.href)),
         });
 
-        //-------------------------------- HELPER FUNCTION -----------------------------
+        //-------------------------------- HELPER FUNCTIONS -----------------------------
         /**
          * Helper function to get ID from URL
          * @param url
          */
         function getIDfromURL(url) {
           return url.slice(47).replace(".html", "");
+        }
+
+        /**
+         * Returns a correct username from string. Used to handle multiple
+         * word names
+         * @param {} strings is all strings to sort through
+         */
+        function getUsername(strings) {
+          var username = "";
+          var sections = strings;
+
+          sections.shift(); //remove "Posted"
+          sections.shift(); //remove "by"
+
+          for (let i = 0; i < sections.length; i++) {
+            const element = sections[i];
+            if (element == "on" || element === "on") {
+              break;
+            } else {
+              username += element + " "; //add username word
+            }
+          }
+
+          return username;
+        }
+
+        /**
+         * Returns a correct date from string. Used to handle multiple
+         * word names
+         * @param {} strings is all strings to sort through
+         */
+        function getDate(strings) {
+          var date = "";
+          var sections = strings;
+
+          sections.shift(); //remove "Posted"
+          sections.shift(); //remove "by"
+
+          for (let i = 0; i < sections.length; i++) {
+            const element = sections[i];
+            if (element == "on" || element === "on") {
+              date = (sections[i+1] + " " + sections[i+2].replace(",", "") + " " + sections[i+3].replace(",", ""));
+              break;
+            }
+          }
+
+          return date;
         }
       });
 
@@ -109,61 +157,6 @@ module.exports = {
 
       postObjects[i] = post;
     }
-
-    //------------------------------------------------ OLD ---------------------------------------
-    // //got through all links and create objects that follow
-    // //"all-posts-structure.json" for a single post
-    // var mainPostObjects = [];
-    // for (i = 0; i < mainPosts.length; i++) {
-    //   await page.goto(mainPosts[i]);
-
-    //   const post = await page.evaluate(() => {
-    //     //build template structure
-    //     return (postData = {
-    //       id: getIDfromURL(document.baseURI),
-    //       title: document.querySelector("ul font b").innerText,
-    //       user: document.querySelector("ul div font").innerText.split(" ")[2],
-    //       date:
-    //         document.querySelector("ul div font").innerText.split(" ")[4] +
-    //         " " + //Month eg: September
-    //         document.querySelector("ul div font").innerText.split(" ")[5] +
-    //         " " + //Date eg: 23
-    //         document.querySelector("ul div font").innerText.split(" ")[6], //Year eg: 2020
-    //       time:
-    //         document.querySelector("ul div font").innerText.split(" ")[7] +
-    //         " " +
-    //         document.querySelector("ul div font").innerText.split(" ")[8],
-    //       description: document.querySelector("ul table tbody tr td font div")
-    //         .innerText,
-    //       comments:
-    //         Array.from(
-    //           document.querySelectorAll("ul font table tbody tr td ul li")
-    //         ).length - 1,
-    //       parrentID: document
-    //         .querySelector("ul font a")
-    //         .href.includes("https://members.boardhost.com/peoplesforum")
-    //         ? getIDfromURL(document.querySelector("ul font a").href)
-    //         : "",
-    //       childIDs: Array.from(
-    //         Array.from(document.querySelectorAll("ul"))[1].childNodes
-    //       )
-    //         .slice(1)
-    //         .map((entry) => getIDfromURL(entry.firstChild.href)),
-    //     });
-
-    //     //-------------------------------- HELPER FUNCTION -----------------------------
-    //     /**
-    //      * Helper function to get ID from URL
-    //      * @param url
-    //      */
-    //     function getIDfromURL(url) {
-    //       var size = url.length;
-    //       return url.slice(47).replace(".html", "");
-    //     }
-    //   });
-
-    //   mainPostObjects[i] = post;
-    // }
 
     await browser.close();
 
