@@ -55,28 +55,18 @@ module.exports = {
     }
 
     var postObjects = [];
-    for (i = 0; i < /*propperPostLinks.length*/ 5; i++) {
+    for (i = 0; i < /*propperPostLinks.length*/ 20; i++) {
       await page.goto(propperPostLinks[i]);
 
       const post = await page.evaluate(() => {
         //build template structure
         return (postData = {
           id: getIDfromURL(document.baseURI),
-          title: document.querySelector("ul font b").innerText,
+          title: getTitle(document.querySelector("ul font b").innerText),
           user: getUsername(document.querySelector("ul div font").innerText.split(" ")),
           date: getDate(document.querySelector("ul div font").innerText.split(" ")),
-            //-------- OLD WAY -------
-            // document.querySelector("ul div font").innerText.split(" ")[4] +
-            // " " + //Month eg: September
-            // document.querySelector("ul div font").innerText.split(" ")[5] +
-            // " " + //Date eg: 23
-            // document.querySelector("ul div font").innerText.split(" ")[6], //Year eg: 2020
-          time:
-            document.querySelector("ul div font").innerText.split(" ")[7] +
-            " " +
-            document.querySelector("ul div font").innerText.split(" ")[8],
-          description: document.querySelector("ul table tbody tr td font div")
-            .innerText,
+          time: getTime(document.querySelector("ul div font").innerText.split(" ")),
+          description: getDiscription(document.querySelector("ul table tbody tr td font div").innerText),
           comments:
             Array.from(
               document.querySelectorAll("ul font table tbody tr td ul li")
@@ -100,6 +90,27 @@ module.exports = {
          */
         function getIDfromURL(url) {
           return url.slice(47).replace(".html", "");
+        }
+
+        /**
+         * returns title well formated. returns nothing if "Re:"
+         * @param {} params 
+         */
+        function getTitle(text) {
+          var body = text;
+          //remove "nt"
+          body = body.replace("[nt]", "");
+          body = body.replace("[NT]", "");
+          body = body.replace("[Nt]", "");
+          body = body.replace("nt", "");
+          body = body.replace("NT", "");
+          body = body.replace("Nt", "");
+
+          if (body.includes("Re:")) {
+            body = "";
+          }
+
+          return body;
         }
 
         /**
@@ -147,6 +158,49 @@ module.exports = {
           }
 
           return date;
+        }
+
+        /**
+         * Returns a correct time from strings. Used to handle multiple
+         * word names
+         * @param {} strings is all strings to sort through
+         */
+        function getTime(strings) {
+          var time = "";
+          var sections = strings;
+
+          sections.shift(); //remove "Posted"
+          sections.shift(); //remove "by"
+
+          for (let i = 0; i < sections.length; i++) {
+            const element = sections[i];
+            if (element == "on" || element === "on") {
+              time = (sections[i+4] + " " + sections[i+5].replace(",", ""));
+              break;
+            }
+          }
+
+          return time;
+        }
+
+        /**
+         *  function that formats and handles the body text.
+         * @param {} text 
+         */
+        function getDiscription(text) {
+          var body = text;
+
+          //remove previous message info
+          body = (body.split("Previous Message")[0]);
+          //remove "nt"
+          body = body.replace("[nt]", "");
+          body = body.replace("[NT]", "");
+          body = body.replace("[Nt]", "");
+          body = body.replace("nt", "");
+          body = body.replace("NT", "");
+          body = body.replace("Nt", "");
+
+          return body;
         }
       });
 
