@@ -38,7 +38,7 @@ module.exports = {
     //this is to remove the comment links that arn't needed
     //we just need the main post link.
     var i;
-    for (i = 0; i < postLinks.length; i++) {
+    for (i = 0; i < postLinks.length-1; i++) {
       //if the first link add to posts
       if (i == 0) {
         mainPosts[mainPostsIndex++] = postLinks[i];
@@ -55,7 +55,7 @@ module.exports = {
     }
 
     var postObjects = [];
-    for (i = 0; i < /*propperPostLinks.length*/ 20; i++) {
+    for (i = 0; i < (propperPostLinks.length); i++) {
       await page.goto(propperPostLinks[i]);
 
       const post = await page.evaluate(() => {
@@ -97,8 +97,12 @@ module.exports = {
          * @param {} params 
          */
         function getTitle(text) {
-          var body = text;
+          var body = "";
+          body = text;
           //remove "nt"
+          body = body.replace("(nt)", "");
+          body = body.replace("(NT)", "");
+          body = body.replace("(Nt)", "");
           body = body.replace("[nt]", "");
           body = body.replace("[NT]", "");
           body = body.replace("[Nt]", "");
@@ -109,9 +113,6 @@ module.exports = {
           if (body.includes("Re:")) {
             body = "";
           }
-          
-          //remove all the new lines
-          body.replace("\n\n\n", "").replace("\n\n", "").replace("\n", "");
 
           return body;
         }
@@ -136,8 +137,6 @@ module.exports = {
               username += element + " "; //add username word
             }
           }
-          //remove all the new lines
-          username.replace("\n\n\n", "").replace("\n\n", "").replace("\n", "");
 
           return username;
         }
@@ -161,8 +160,6 @@ module.exports = {
               break;
             }
           }
-          //remove all the new lines
-          date.replace("\n\n\n", "").replace("\n\n", "").replace("\n", "");
 
           return date;
         }
@@ -186,8 +183,6 @@ module.exports = {
               break;
             }
           }
-          //remove all the new lines
-          time.replace("\n\n\n", "").replace("\n\n", "").replace("\n", "");
 
           return time;
         }
@@ -197,19 +192,21 @@ module.exports = {
          * @param {} text 
          */
         function getDiscription(text) {
-          var body = text;
+          var body = "";
+          body = text;
 
           //remove previous message info
           body = (body.split("Previous Message")[0]);
           //remove "nt"
+          body = body.replace("(nt)", "");
+          body = body.replace("(NT)", "");
+          body = body.replace("(Nt)", "");
           body = body.replace("[nt]", "");
           body = body.replace("[NT]", "");
           body = body.replace("[Nt]", "");
           body = body.replace("nt", "");
           body = body.replace("NT", "");
-          body = body.replace("Nt", "");
-          //remove all the new lines
-          body.replace("\n\n\n", "").replace("\n\n", "").replace("\n", "");
+          body = body.replace("Nt", "");          
           
           return body;
         }
