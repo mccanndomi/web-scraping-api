@@ -109,6 +109,9 @@ module.exports = {
           if (body.includes("Re:")) {
             body = "";
           }
+          
+          //remove all the new lines
+          body.replace("\n\n\n", "").replace("\n\n", "").replace("\n", "");
 
           return body;
         }
@@ -133,6 +136,8 @@ module.exports = {
               username += element + " "; //add username word
             }
           }
+          //remove all the new lines
+          username.replace("\n\n\n", "").replace("\n\n", "").replace("\n", "");
 
           return username;
         }
@@ -156,6 +161,8 @@ module.exports = {
               break;
             }
           }
+          //remove all the new lines
+          date.replace("\n\n\n", "").replace("\n\n", "").replace("\n", "");
 
           return date;
         }
@@ -179,6 +186,8 @@ module.exports = {
               break;
             }
           }
+          //remove all the new lines
+          time.replace("\n\n\n", "").replace("\n\n", "").replace("\n", "");
 
           return time;
         }
@@ -199,7 +208,9 @@ module.exports = {
           body = body.replace("nt", "");
           body = body.replace("NT", "");
           body = body.replace("Nt", "");
-
+          //remove all the new lines
+          body.replace("\n\n\n", "").replace("\n\n", "").replace("\n", "");
+          
           return body;
         }
       });
