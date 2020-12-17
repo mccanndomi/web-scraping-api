@@ -1,5 +1,5 @@
-const firebase = require('firebase/app');
-require('firebase/database');
+const firebase = require("firebase/app");
+require("firebase/database");
 var firebaseConfig = {
   apiKey: "AIzaSyBjllX7M_p3lwZlTbrnz0HUtNQiWg_v_sc",
   authDomain: "web-scraping-api.firebaseapp.com",
@@ -14,6 +14,11 @@ var database = firebase.database();
 const puppeteer = require("puppeteer");
 
 const HOME_URL = "https://members.boardhost.com/peoplesforum/";
+const testingPosts = [
+  "https://members.boardhost.com/peoplesforum/msg/1608053554.html", //contains hidden link
+  "https://members.boardhost.com/peoplesforum/msg/1608049910.html", //contains normal link
+  "https://members.boardhost.com/peoplesforum/msg/1608149348.html", //contains no link
+];
 
 module.exports = {
   /**
@@ -21,7 +26,7 @@ module.exports = {
    */
   posts: async () => {
     //init browser
-    const browser = await puppeteer.launch({ headless: false });
+    const browser = await puppeteer.launch({ headless: true });
     const page = await browser.newPage();
     await page.goto(HOME_URL);
 
@@ -38,7 +43,26 @@ module.exports = {
     //this is to remove the comment links that arn't needed
     //we just need the main post link.
     var i;
-    for (i = 0; i < postLinks.length-1; i++) {
+
+    /* ---------------------------- GENERATING POST LINKS TESTING ------------------------------- */
+    // for (i = 0; i < testingPosts.length; i++) {
+    //   console.log(testingPosts[i]);
+    //   //if the first link add to posts
+    //   if (i == 0) {
+    //     mainPosts[mainPostsIndex++] = testingPosts[i];
+    //   }
+    //   //if previous link is blank then add this link as
+    //   //it is start of new thread
+    //   if (testingPosts[i - 1] == "") {
+    //     mainPosts[mainPostsIndex++] = testingPosts[i];
+    //   }
+    //   if (testingPosts[i] != "") {
+    //     propperPostLinks[propperPostIndex++] = testingPosts[i];
+    //   }
+    // }
+
+    /* -------------------------------- GENERATING POST LINKS ----------------------------------- */
+    for (i = 0; i < postLinks.length - 1; i++) {
       //if the first link add to posts
       if (i == 0) {
         mainPosts[mainPostsIndex++] = postLinks[i];
@@ -55,7 +79,7 @@ module.exports = {
     }
 
     var postObjects = [];
-    for (i = 0; i < (propperPostLinks.length); i++) {
+    for (i = 0; i < propperPostLinks.length; i++) {
       await page.goto(propperPostLinks[i]);
 
       const post = await page.evaluate(() => {
@@ -63,14 +87,26 @@ module.exports = {
         return (postData = {
           id: getIDfromURL(document.baseURI),
           title: getTitle(document.querySelector("ul font b").innerText),
-          user: getUsername(document.querySelector("ul div font").innerText.split(" ")),
-          date: getDate(document.querySelector("ul div font").innerText.split(" ")),
-          time: getTime(document.querySelector("ul div font").innerText.split(" ")),
-          description: getDiscription(document.querySelector("ul table tbody tr td font div").innerText),
+          user: getUsername(
+            document.querySelector("ul div font").innerText.split(" ")
+          ),
+          date: getDate(
+            document.querySelector("ul div font").innerText.split(" ")
+          ),
+          time: getTime(
+            document.querySelector("ul div font").innerText.split(" ")
+          ),
+          description: getDiscription(
+            document.querySelector("ul table tbody tr td font div").innerText
+          ),
           comments:
             Array.from(
               document.querySelectorAll("ul font table tbody tr td ul li")
-            ).length - 1,
+            ).length == 2
+              ? 0
+              : Array.from(
+                  document.querySelectorAll("ul font table tbody tr td ul li")
+                ).length - 1,
           parrentID: document
             .querySelector("ul font a")
             .href.includes("https://members.boardhost.com/peoplesforum")
@@ -81,6 +117,13 @@ module.exports = {
           )
             .slice(1)
             .map((entry) => getIDfromURL(entry.firstChild.href)),
+          link:
+            Array.from(document.querySelectorAll("ul font p a")).length != 0
+              ? document.querySelector("ul font p a").href
+              : document.querySelector("ul font div a").href !=
+                "https://secure.boardhost.com/mb/login/peoplesforum"
+              ? document.querySelector("ul font div a").href
+              : null,
         });
 
         //-------------------------------- HELPER FUNCTIONS -----------------------------
@@ -94,7 +137,7 @@ module.exports = {
 
         /**
          * returns title well formated. returns nothing if "Re:"
-         * @param {} params 
+         * @param {} params
          */
         function getTitle(text) {
           var body = "";
@@ -156,7 +199,12 @@ module.exports = {
           for (let i = 0; i < sections.length; i++) {
             const element = sections[i];
             if (element == "on" || element === "on") {
-              date = (sections[i+1] + " " + sections[i+2].replace(",", "") + " " + sections[i+3].replace(",", ""));
+              date =
+                sections[i + 1] +
+                " " +
+                sections[i + 2].replace(",", "") +
+                " " +
+                sections[i + 3].replace(",", "");
               break;
             }
           }
@@ -179,7 +227,7 @@ module.exports = {
           for (let i = 0; i < sections.length; i++) {
             const element = sections[i];
             if (element == "on" || element === "on") {
-              time = (sections[i+4] + " " + sections[i+5].replace(",", ""));
+              time = sections[i + 4] + " " + sections[i + 5].replace(",", "");
               break;
             }
           }
@@ -189,14 +237,14 @@ module.exports = {
 
         /**
          *  function that formats and handles the body text.
-         * @param {} text 
+         * @param {} text
          */
         function getDiscription(text) {
           var body = "";
           body = text;
 
           //remove previous message info
-          body = (body.split("Previous Message")[0]);
+          body = body.split("Previous Message")[0];
           //remove "nt"
           body = body.replace("(nt)", "");
           body = body.replace("(NT)", "");
@@ -206,16 +254,14 @@ module.exports = {
           body = body.replace("[Nt]", "");
           body = body.replace("nt", "");
           body = body.replace("NT", "");
-          body = body.replace("Nt", "");          
-          
+          body = body.replace("Nt", "");
+
           return body;
         }
       });
 
       //add post structure to firebase.
-      database.ref('posts/' + post.id).set(
-        post
-      );
+      database.ref("posts/" + post.id).set(post);
 
       postObjects[i] = post;
     }
