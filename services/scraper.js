@@ -1,16 +1,16 @@
-const firebase = require("firebase/app");
-require("firebase/database");
-var firebaseConfig = {
-  apiKey: "AIzaSyBjllX7M_p3lwZlTbrnz0HUtNQiWg_v_sc",
-  authDomain: "web-scraping-api.firebaseapp.com",
-  databaseURL: "https://web-scraping-api.firebaseio.com",
-  projectId: "web-scraping-api",
-  storageBucket: "web-scraping-api.appspot.com",
-  messagingSenderId: "562655786141",
-  appId: "1:562655786141:web:da6c23efde05ab23629074",
-};
-firebase.initializeApp(firebaseConfig);
-var database = firebase.database();
+// const firebase = require("firebase/app");
+// require("firebase/database");
+// var firebaseConfig = {
+//   apiKey: "AIzaSyBjllX7M_p3lwZlTbrnz0HUtNQiWg_v_sc",
+//   authDomain: "web-scraping-api.firebaseapp.com",
+//   databaseURL: "https://web-scraping-api.firebaseio.com",
+//   projectId: "web-scraping-api",
+//   storageBucket: "web-scraping-api.appspot.com",
+//   messagingSenderId: "562655786141",
+//   appId: "1:562655786141:web:da6c23efde05ab23629074",
+// };
+// firebase.initializeApp(firebaseConfig);
+// var database = firebase.database();
 const puppeteer = require("puppeteer");
 
 const HOME_URL = "https://members.boardhost.com/peoplesforum/";
@@ -85,6 +85,8 @@ module.exports = {
       const post = await page.evaluate(() => {
         //build template structure
         return (postData = {
+          media: false,
+          source: "TPF",
           id: getIDfromURL(document.baseURI),
           title: getTitle(document.querySelector("ul font b").innerText),
           user: getUsername(
@@ -100,13 +102,10 @@ module.exports = {
             document.querySelector("ul table tbody tr td font div").innerText
           ),
           comments:
-            Array.from(
-              document.querySelectorAll("ul font table tbody tr td ul li")
-            ).length == 2
+            document.querySelector("li").innerText ==
+            "There are no responses to this message."
               ? 0
-              : Array.from(
-                  document.querySelectorAll("ul font table tbody tr td ul li")
-                ).length - 1,
+              : Array.from(document.querySelectorAll("li")).length - 1,
           parrentID: document
             .querySelector("ul font a")
             .href.includes("https://members.boardhost.com/peoplesforum")
@@ -285,6 +284,8 @@ module.exports = {
     const post = await page.evaluate(() => {
       //build template structure
       return (postData = {
+        media: false,
+        source: "TPF",
         id: "",
         title: document.querySelector("ul font b").innerText,
         user: document.querySelector("ul div font").innerText.split(" ")[2],
