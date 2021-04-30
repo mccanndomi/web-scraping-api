@@ -1,18 +1,18 @@
 const fetch = require("node-fetch");
 
-const firebase = require("firebase/app");
-require("firebase/database");
-var firebaseConfig = {
-  apiKey: "AIzaSyBjllX7M_p3lwZlTbrnz0HUtNQiWg_v_sc",
-  authDomain: "web-scraping-api.firebaseapp.com",
-  databaseURL: "https://web-scraping-api.firebaseio.com",
-  projectId: "web-scraping-api",
-  storageBucket: "web-scraping-api.appspot.com",
-  messagingSenderId: "562655786141",
-  appId: "1:562655786141:web:da6c23efde05ab23629074",
-};
-firebase.initializeApp(firebaseConfig);
-var database = firebase.database();
+// const firebase = require("firebase/app");
+// require("firebase/database");
+// var firebaseConfig = {
+//   apiKey: "AIzaSyBjllX7M_p3lwZlTbrnz0HUtNQiWg_v_sc",
+//   authDomain: "web-scraping-api.firebaseapp.com",
+//   databaseURL: "https://web-scraping-api.firebaseio.com",
+//   projectId: "web-scraping-api",
+//   storageBucket: "web-scraping-api.appspot.com",
+//   messagingSenderId: "562655786141",
+//   appId: "1:562655786141:web:da6c23efde05ab23629074",
+// };
+// firebase.initializeApp(firebaseConfig);
+// var database = firebase.database();
 
 module.exports = {
   posts: async () => {
@@ -95,7 +95,7 @@ module.exports = {
         }
       });
 
-    return "finished GET";
+    return "fetched reddit data";
   },
 };
 
